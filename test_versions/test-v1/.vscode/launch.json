@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/abdulwahid/projects/8P_game/test_versions/test-v1",
+      "program": "/Users/abdulwahid/projects/8P_game/test_versions/test-v1/build/Debug/outDebug"
+    }
+  ]
+}

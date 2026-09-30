@@ -1,12 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
+#include<unistd.h>
+
 #define MAX 8
 #define n 3
 #define m 3
-
-void init();
-void solver();
 
 int tile[n][m];
 
@@ -14,16 +13,11 @@ int tile[n][m];
 //===========================================================================//
 
 typedef struct{
-	bool arr[4];//0->arr[0]
-		    //1->arr[1]
-		    //2->arr[2]
-		    //3->arr[3]
-}dir;
-
-typedef struct{
-	bool solved;
-	int count;
-}solve;
+	bool dir[4];//0->arr[0]->right
+		    //1->arr[1]->left
+		    //2->arr[2]->up
+		    //3->arr[3]->down
+}direc;
 
 typedef struct{
 	int x;
@@ -32,7 +26,6 @@ typedef struct{
 
 void init(){
 	int x=rand()%n, y=rand()%m;
-	printf("%d, %d\n", x, y);
 	tile[x][y]=0;
 	for(int i=0; i<n; i++){
 		for(int j=0; j<m; j++){
@@ -103,22 +96,21 @@ void swap(int*a, int*b){
 	*b=temp;
 }
 
-int max_point(int arr[]){
-	int max=0;
-	int n=sizeof(arr)/4;
-	for(int i=0; i<n; i++){
-		if(arr[i]>arr[max]){
-			max=arr[i];
+int max(int arr[]){
+	int mx=0;
+	for(int i=0; i<4; i++){
+		if(arr[i]>arr[mx]&&(arr[i]!=-1)){
+			mx=i;
 		}
 	}
-	return max;
+	return mx;
 }
 //====================================================================//
 //The real game logic bellow
 //====================================================================//
 
 int count(){
-	int ct;
+	int ct=0;
 	for(int i=0; i<n; i++){
 		for(int j=0; j<m; j++){
 			if(i==0&&(tile[i][j]==j+1)){
@@ -163,64 +155,98 @@ bool is_solved(){
 
 //The direction determiner
 
-dir direction(cord c){
-	dir d;
-	d.arr[1]=true;
-	d.arr[0]=true;
-	d.arr[2]=true;
-	d.arr[3]=true;
+direc direction(cord c){
+	direc d;
+	d.dir[1]=true;
+	d.dir[0]=true;
+	d.dir[2]=true;
+	d.dir[3]=true;
 
 	if(c.x-1<0){
-		d.arr[2]=false;
+		d.dir[2]=false;
 	}
 	if(c.x+1>2){
-		d.arr[3]=false;
+		d.dir[3]=false;
 	}
 	if(c.y-1<0){
-		d.arr[1]=false;
+		d.dir[1]=false;
 	}
 	if(c.y+1>2){
-		d.arr[0]=false;
+		d.dir[0]=false;
 	}
 	return d;
 }
 
 //The test for finding the max point
 
-int point(int cor[]){
-	int arr[n][m];
-
+int best_move(){
+	int corr[4];
 	cord c=search(0);
-	dir d=direction(c);
-	//Copy the arry for experiment
-	for(int i=0; i<n; i++){
-		for(int j=0; j<m; j++){
-			arr[i][j]=tile[i][j];
-		}
+	direc d=direction(c);
+	
+	if(d.dir[0]==true){
+		swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+		corr[0]=count();
+		swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+	}
+	else{
+                corr[0]=-1;
+        }
+	if(d.dir[1]==true){
+		swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+		corr[1]=count();
+		swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+	}
+	else{
+                corr[1]=-1;
+        }
+	if(d.dir[2]==true){
+		swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
+		corr[2]=count();
+		swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
+	}
+	else{
+                corr[2]=-1;
+        }
+	if(d.dir[3]==true){
+		swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
+		corr[3]=count();
+		swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
+	}
+	else{
+		corr[3]=-1;
 	}
 
-	for(int i=0; i<4; i++){
-		if(d.arr[0]!=false){
-			swap(arr[c.y], arr[c.y+1]);
-			cor[i]=count();
-		}
-		else{
-			cor[i]=-1;
-		}
+	int mx=max(corr);
+
+	if(mx==8){
+		return 0;
 	}
 
+	if(mx==0&&corr[0]!=-1){
+		swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+	}
+	else if(mx==1&&corr[1]!=-1){
+		swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+	}
+	else if(mx==2&&corr[2]!=-1){
+		swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
+	}
+	else if(mx==3&&corr[3]!=-1){
+		swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
+	}
+	return 0;
 }
 
 //The solver//
 
 void solver(){
-	int corr[4], arr[n][m];
-	for(int i=0; i<n; i++){
-		for(int j=0; j<m; j++){
-			arr[i][j]=tile[i][j];
-		}
+	while(!is_solved()){
+		display();
+		printf("\n\n");
+		sleep(1);
+		best_move();
 	}
-	point(corr);
 }
 
 //The main function//
@@ -229,6 +255,6 @@ int main(){
 	srand(time(NULL));
 	init();
 	filler();
-	display();
+	solver();
 	return 0;
 }

@@ -171,8 +171,9 @@ dir direction(cord c){
 
 void solver(){
 	int corr[4];
-	while not is_solved:
+	while (!is_solved()){
 		solver();
+	}
 }
 
 //The main function//
