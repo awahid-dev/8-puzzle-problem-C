@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<time.h>
 #include<unistd.h>
+#include<math.h>
 
 #define MAX 8
 #define n 3
@@ -39,7 +40,7 @@ void init(){
 	}
 }
 
-cord_t  search(int key){
+cord_t search(int key){
 	cord_t c;
 	for(int i=0; i<n; i++){
 		for(int j=0; j<m; j++){
@@ -109,26 +110,6 @@ int max(int arr[]){
 //The real game logic bellow
 //====================================================================//
 
-int count(){
-	int ct=0;
-	for(int i=0; i<n; i++){
-		for(int j=0; j<m; j++){
-			if(i==0&&(tile[i][j]==j+1)){
-				ct++;
-			}
-			else if(i==2&&(tile[i][j]==7-j)){
-				ct++;	
-			}
-			else if(i==1){
-				if((j==2&&tile[i][j]==4)||(j==0&&tile[i][j]==8)){
-					ct++;
-				}
-			}
-		}
-	}
-	return ct;
-}
-
 bool is_solved(){
 	int ct=0;
 	for(int i=0; i<n; i++){
@@ -177,76 +158,64 @@ direc_t direction(cord_t c){
 	return d;
 }
 
-//The test for finding the max point
+//correct coordination
 
-int best_move(){
-	int corr[4];
-	cord_t c=search(0);
-	direc_t d=direction(c);
-	
-	if(d.dir[0]==true){
-		swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
-		corr[0]=count();
-		swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+cord_t correct_position(int key){
+	cord_t correct_cord;
+	if(key<=3&&key>=1){
+		correct_cord.y=key-1;
+		correct_cord.x=0;
+		return correct_cord;
 	}
-	else{
-                corr[0]=-1;
-        }
-	if(d.dir[1]==true){
-		swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
-		corr[1]=count();
-		swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+	if(key<=7&&key>=5){
+		correct_cord.y=7-key;
+		correct_cord.x=2;
+		return correct_cord;
 	}
-	else{
-                corr[1]=-1;
-        }
-	if(d.dir[2]==true){
-		swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
-		corr[2]=count();
-		swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
+	if(key==4){
+		correct_cord.y=2;
+		correct_cord.x=1;
+		return correct_cord;
 	}
-	else{
-                corr[2]=-1;
-        }
-	if(d.dir[3]==true){
-		swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
-		corr[3]=count();
-		swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
+	if(key==8){
+		correct_cord.y=0;
+		correct_cord.x=1;
+		return correct_cord;
 	}
-	else{
-		corr[3]=-1;
-	}
-
-	int mx=max(corr);
-
-	if(mx==8){
-		return 0;
-	}
-
-	if(mx==0&&corr[0]!=-1){
-		swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
-	}
-	else if(mx==1&&corr[1]!=-1){
-		swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
-	}
-	else if(mx==2&&corr[2]!=-1){
-		swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
-	}
-	else if(mx==3&&corr[3]!=-1){
-		swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
-	}
-	return 0;
 }
 
+//The distance finds the distance from the correct possition
+
+float distance(){
+	float dist=0;
+	cord_t correct_cord, current_cord;
+	for(int i=0; i<n; i++){
+		for(int j=0; j<m; j++){
+			current_cord.x=i;
+			current_cord.y=j;
+			correct_cord=correct_position(tile[i][j]);
+
+			float x_cord_res=pow((current_cord.x-correct_cord.x), 2);
+			float y_cord_res=pow((current_cord.y-correct_cord.y), 2);
+			dist+=sqrt(x_cord_res+y_cord_res);
+		}
+	}
+	return dist;
+}
+
+void best_move(){
+	float dist[4];
+}
 //The solver//
 
 void solver(){
 	while(!is_solved()){
 		display();
+		break;
 		printf("\n\n");
 		sleep(1);
-		best_move();
 	}
+	printf("%f ", distance());
 }
 
 //The main function//
