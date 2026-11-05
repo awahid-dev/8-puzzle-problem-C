@@ -205,8 +205,59 @@ float distance(){
 
 void best_move(){
 	float dist[4];
+
+	 if(d.dir[0]==true){
+                swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+                corr[0]=distance()
+                swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+        }
+        else{
+                corr[0]=-1;
+        }
+        if(d.dir[1]==true){
+                swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+                corr[1]=distance();
+                swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+        }
+        else{
+                corr[1]=-1;
+        }
+        if(d.dir[2]==true){
+                swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
+                corr[2]=distance();
+                swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
+        }
+        else{
+                corr[2]=-1;
+        }
+        if(d.dir[3]==true){
+                swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
+                corr[3]=distance();
+                swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
+        }
+        else{
+                corr[3]=-1;
+        }
+
+        float mx=max(corr);
+
+        if(mx==8){
+                return 0;
+        }
+
+        if(mx==0&&corr[0]!=-1){
+                swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+        }
+                                                                                                                                                                   223,3-17      84%
+        if(mx==0&&corr[0]!=-1){
+                swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+        }
+        else if(mx==1&&corr[1]!=-1){
+                swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+        }
 }
-//The solver//
+
+       //The solver//
 
 void solver(){
 	while(!is_solved()){
