@@ -97,14 +97,14 @@ void swap(int*a, int*b){
 	*b=temp;
 }
 
-int max(int arr[]){
-	int mx=0;
+int min(int arr[]){
+	int mn=0;
 	for(int i=0; i<4; i++){
-		if(arr[i]>arr[mx]&&(arr[i]!=-1)){
-			mx=i;
+		if(arr[i]<arr[mn]&&(arr[i]!=-1)){
+			mn=i;
 		}
 	}
-	return mx;
+	return mn;
 }
 //====================================================================//
 //The real game logic bellow
@@ -186,74 +186,72 @@ cord_t correct_position(int key){
 
 //The distance finds the distance from the correct possition
 
-float distance(){
-	float dist=0;
+int distance(){
+	int dist=0;
 	cord_t correct_cord, current_cord;
 	for(int i=0; i<n; i++){
 		for(int j=0; j<m; j++){
+			if(tile[i][j]==0)break;
 			current_cord.x=i;
 			current_cord.y=j;
 			correct_cord=correct_position(tile[i][j]);
-
-			float x_cord_res=pow((current_cord.x-correct_cord.x), 2);
-			float y_cord_res=pow((current_cord.y-correct_cord.y), 2);
-			dist+=sqrt(x_cord_res+y_cord_res);
+	
+			dist+=abs(current_cord.x-correct_cord.x)
+			     +abs(current_cord.y-correct_cord.y);
 		}
 	}
 	return dist;
 }
 
 void best_move(){
-	float dist[4];
-
-	 if(d.dir[0]==true){
+	int dist[4];
+	cord_t c=search(0);
+	direc_t d=direction(c);
+	int prev_dist=distance();
+	if(d.dir[0]==true){
                 swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
-                corr[0]=distance()
+                dist[0]=distance();
                 swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
         }
         else{
-                corr[0]=-1;
+               dist[0]=-1;
         }
         if(d.dir[1]==true){
                 swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
-                corr[1]=distance();
+                dist[1]=distance();
                 swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
         }
         else{
-                corr[1]=-1;
+                dist[1]=-1;
         }
         if(d.dir[2]==true){
                 swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
-                corr[2]=distance();
+                dist[2]=distance();
                 swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
         }
         else{
-                corr[2]=-1;
+                dist[2]=-1;
         }
         if(d.dir[3]==true){
                 swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
-                corr[3]=distance();
+                dist[3]=distance();
                 swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
         }
         else{
-                corr[3]=-1;
+                dist[3]=-1;
         }
-
-        float mx=max(corr);
-
-        if(mx==8){
-                return 0;
-        }
-
-        if(mx==0&&corr[0]!=-1){
-                swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
-        }
-                                                                                                                                                                   223,3-17      84%
-        if(mx==0&&corr[0]!=-1){
-                swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
-        }
-        else if(mx==1&&corr[1]!=-1){
-                swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+	int mn=min(dist);
+	if(mn==0&&dist[0]!=-1&&prev_dist>dist[0]){
+		swap(&tile[c.x][c.y], &tile[c.x][c.y+1]);
+	}
+	else if(mn==1&&dist[1]!=-1&&prev_dist>dist[1]){
+              	swap(&tile[c.x][c.y], &tile[c.x][c.y-1]);
+       	}
+       	else if(mn==2&&dist[2]!=-1&&prev_dist>dist[2]){
+              	swap(&tile[c.x][c.y], &tile[c.x-1][c.y]);
+       	}
+       	else if(mn==3&&dist[3]!=-1&&prev_dist>dist[3]){
+            	swap(&tile[c.x][c.y], &tile[c.x+1][c.y]);
         }
 }
 
@@ -261,12 +259,11 @@ void best_move(){
 
 void solver(){
 	while(!is_solved()){
+		best_move();
 		display();
-		break;
 		printf("\n\n");
 		sleep(1);
 	}
-	printf("%f ", distance());
 }
 
 //The main function//
